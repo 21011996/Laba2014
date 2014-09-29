@@ -3,39 +3,38 @@
 var
   f,g:Text;
   a:array of array of Integer;
-  answer:array of Integer;
-  i,n,m,l1,l2,count:Integer;
-  flag:Boolean;
+  i,n,m,start,l1,l2:Integer;
+  answer:Boolean;
 
-procedure topsort(x:Integer);
+procedure findoutwinner(x:Integer; firstwin:Boolean);
   var
     j:Integer;
+    flag:Boolean;
   begin
-    a[x][0]:=1;
+    flag:=False;
     for j:=1 to Length(a[x])-1 do
       begin
+        flag:=True;
         if a[a[x][j]][0] = 0 then
-          topsort(a[x][j]);
-        if a[a[x][j]][0] = 1 then
-          flag:=False;
+          findoutwinner(a[x][j],not firstwin);
       end;
-    count:=count+1;
-    answer[count]:=x;
-    a[x][0]:=2;
+    if (flag=False) and (firstwin=True) then
+      begin
+        answer:=True;
+        Exit;
+      end;
   end;
 
 begin
-  flag:=True;
-  count:=0;
+  answer:=False;
 
-  Assign(f,'topsort.in');
-  Assign(g,'topsort.out');
+  Assign(f,'game.in');
+  Assign(g,'game.out');
   Reset(f);
   Rewrite(g);
 
-  Readln(f,n,m);
+  Readln(f,n,m,start);
   SetLength(a,n+1);
-  SetLength(answer,n+1);
 
   for i:=1 to n do
     begin
@@ -49,23 +48,13 @@ begin
       SetLength(a[l1],Length(a[l1])+1);
       a[l1][Length(a[l1])-1]:=l2;
     end;
-  for i:=1 to n do
+  findoutwinner(start,False);
+  if answer=True then
     begin
-      if a[i][0]<>2 then
-        topsort(i);
-      if flag=False then
-        begin
-          Writeln(g,-1);
-          break;
-        end;
-    end;
-  if flag=True then
-    begin
-      for i:=n downto 1 do
-        begin
-          write(g,answer[i],' ');
-        end;
-    end;
+      Writeln(g,'First player wins');
+    end
+  else
+    Writeln(g,'Second player wins');
   Close(f);
   Close(g);
 end.

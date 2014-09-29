@@ -14,13 +14,11 @@ procedure findtheway(x:Integer;length:Integer);
   var
     j:Integer;
   begin
-    a[x][0][1]:=1;
     for j:=1 to a[x][0][2]-1 do
       begin
         if a[a[x][j][1]][0][1] = 0 then
           findtheway(a[x][j][1],length + a[x][j][2]);
       end;
-    a[x][0][1]:=2;
     if x=t then
       if flag = False then
         begin
