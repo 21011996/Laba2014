@@ -1,7 +1,10 @@
 {$M 16384,16777216}
 
 type
-  pair = array[1..2] of Integer;
+  pair = record
+    point:Integer;
+    way:Integer;
+  end;
 
 var
   f,g:Text;
@@ -10,24 +13,27 @@ var
   i,n,m,s,t,l1,l2,l3:Integer;
   flag:Boolean;
 
-procedure findtheway(x:Integer;length:Integer);
+procedure findtheway(x:Integer);
   var
     j:Integer;
   begin
-    for j:=1 to a[x][0][2]-1 do
+    a[x][0].point:=1;
+    for j:=1 to Length(a[x])-1 do
       begin
-        if a[a[x][j][1]][0][1] = 0 then
-          findtheway(a[x][j][1],length + a[x][j][2]);
+        if a[a[x][j].point][0].point = 1 then
+          begin
+            if  a[a[x][j].point][0].way > (a[x][0].way+a[x][j].way) then
+              begin
+                a[a[x][j].point][0].way:=a[x][0].way+a[x][j].way;
+                findtheway(a[x][j].point);
+              end;
+          end;
+        if a[a[x][j].point][0].point = 0 then
+          begin
+            a[a[x][j].point][0].way:=a[x][0].way+a[x][j].way;
+            findtheway(a[x][j].point);
+          end;
       end;
-    if x=t then
-      if flag = False then
-        begin
-          answer:=length;
-          flag:=true;
-        end
-      else
-        if answer>length then
-          answer:=length;
   end;
 
 begin
@@ -38,28 +44,27 @@ begin
   Reset(f);
   Rewrite(g);
 
-  Readln(f,n,m,s,t);
+  Readln(f,n,m,t,s);
   SetLength(a,n+1);
 
   for i:=1 to n do
     begin
       SetLength(a[i],1);
-      a[i][0][1]:=0;
-      a[i][0][2]:=1;
+      a[i][0].point:=0;
+      a[i][0].way:=0;
     end;
 
   for i:=1 to m do
     begin
-      Readln(f,l1,l2,l3);
-      a[l1][0][2]:=a[l1][0][2]+1;
-      SetLength(a[l1],a[l1][0][2]);
-      a[l1][Length(a[l1])-1][1]:=l2;
-      a[l1][Length(a[l1])-1][2]:=l3;
+      Readln(f,l2,l1,l3);
+      SetLength(a[l1],Length(a[l1])+1);
+      a[l1][Length(a[l1])-1].point:=l2;
+      a[l1][Length(a[l1])-1].way:=l3;
     end;
-  findtheway(s,0);
+  findtheway(s);
 
-  if flag = True then
-    Writeln(g,answer)
+  if a[t][0].point = 1 then
+    Writeln(g,a[t][0].way)
   else
     Writeln(g,'Unreachable');
   Close(f);

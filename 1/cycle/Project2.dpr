@@ -15,25 +15,30 @@ procedure findcircle(x:Integer);
     a[x][0]:=1;
     for j:=1 to Length(a[x])-1 do
       begin
+        if flag=true then
+          break;
         if a[a[x][j]][0] = 0 then
           findcircle(a[x][j]);
         if a[a[x][j]][0] = 1 then
           begin
             flag:=true;
             point:=a[x][j];
-            Writeln(g,'YES');
             Break;
           end;
       end;
     a[x][0]:=2;
     if x=point then
       begin
-        write(g,x);
+        SetLength(answer,Length(answer)+1);
+        answer[Length(answer)-1]:=x;
         flag2:=True;
         Exit;
       end;
     if (flag=True) and (flag2 = False) then
-      write(g,x,' ');
+      begin
+        SetLength(answer,Length(answer)+1);
+        answer[Length(answer)-1]:=x;
+      end;
   end;
 
 begin
@@ -47,7 +52,7 @@ begin
 
   Readln(f,n,m);
   SetLength(a,n+1);
-  SetLength(answer,n+1);
+  SetLength(answer,1);
 
   for i:=1 to n do
     begin
@@ -72,7 +77,15 @@ begin
     end;
   if flag=false then
     begin
-      write(g,'NO');
+      writeln(g,'NO');
+    end
+  else
+    begin
+      Writeln(g,'YES');
+      for i:=Length(answer)-1 downto 1  do
+        begin
+          write(g,answer[i],' ');
+        end;
     end;
   Close(f);
   Close(g);
