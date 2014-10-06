@@ -17,8 +17,11 @@ function min(a,b:Integer):Integer;
 
 procedure findanswer(x:Integer);
   begin
-    a[x][0]:=2;
-    inc(answers);
+    if a[x][0]<> 2 then
+    begin
+      a[x][0]:=2;
+      inc(answers);
+    end;
   end;
 
 procedure points(v,p:Integer);
@@ -80,8 +83,9 @@ begin
       SetLength(a[l2],Length(a[l2])+1);
       a[l2][Length(a[l2])-1]:=l1;
     end;
-
-  points(1,-1);
+  for i:=1 to n do
+    if a[i][0]=0 then
+      points(i,-1);
 
   Writeln(g,answers);
   for i:=1 to n do
