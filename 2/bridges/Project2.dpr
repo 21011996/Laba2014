@@ -3,11 +3,10 @@
 var
   f,g:Text;
   a:array of array of Integer;
-  b:array of array[1..2] of Integer;
+  b:array of array[0..2] of Integer;
   tin,fup:array of Integer;
   i,n,m,l1,l2:Integer;
-  count:Integer;
-  answer:array of Integer;
+  count,answers:Integer;
 
 function min(a,b:Integer):Integer;
   begin
@@ -19,13 +18,24 @@ function min(a,b:Integer):Integer;
 
 procedure findanswer(x,y:Integer);
   var
-    k:Integer;
+    k,ans,r:Integer;
   begin
     k:=1;
-    while ((b[k][1]<>x) or (b[k][2]<>y)) and ((b[k][2]<>x) or (b[k][1]<>y)) do
-      Inc(k);
-    answer[Length(answer)-1]:=k;
-    SetLength(answer,Length(answer)+1);
+    r:=0;
+    while k<=m do
+      begin
+        if ((b[k][1]=x) and (b[k][2]=y)) or ((b[k][2]=x) and (b[k][1]=y)) then
+          begin
+            r:=r+1;
+            ans:=k;
+          end;
+        Inc(k);
+      end;
+    if r=1 then
+      begin
+        b[ans][0]:=1;
+        Inc(answers);
+      end;
   end;
 
 procedure bridges(v,p:Integer);
@@ -56,6 +66,7 @@ procedure bridges(v,p:Integer);
 
 begin
   count:=0;
+  answers:=0;
 
   Assign(f,'bridges.in');
   Assign(g,'bridges.out');
@@ -68,7 +79,6 @@ begin
   SetLength(tin,n+1);
   SetLength(fup,n+1);
   SetLength(b,m+1);
-  SetLength(answer,1);
 
   for i:=1 to n do
     begin
@@ -83,6 +93,7 @@ begin
       a[l1][Length(a[l1])-1]:=l2;
       SetLength(a[l2],Length(a[l2])+1);
       a[l2][Length(a[l2])-1]:=l1;
+      b[i][0]:=0;
       b[i][1]:=l1;
       b[i][2]:=l2;
     end;
@@ -91,9 +102,10 @@ begin
     if a[i][0]=0 then
       bridges(i,-1);
 
-  Writeln(g,Length(answer)-1);
-  for i:=0 to Length(answer)-2 do
-    Writeln(g,answer[i]);
+  Writeln(g,answers);
+  for i:=1 to m do
+    if b[i][0]=1 then
+      write(g,i,' ');
 
   Close(f);
   Close(g);
