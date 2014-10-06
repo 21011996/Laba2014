@@ -3,30 +3,68 @@
 var
   f,g:Text;
   a:array of array of Integer;
-  i,n,m,l1,l2,count:Integer;
+  tin,fup:array of Integer;
+  i,n,m,l1,l2:Integer;
+  count,answers:Integer;
 
-procedure components(x:Integer);
-  var
-    j:Integer;
+function min(a,b:Integer):Integer;
   begin
-    a[x][0]:=count;
-    for j:=1 to Length(a[x])-1 do
-      begin
-        if a[a[x][j]][0] = 0 then
-          components(a[x][j]);
-      end;
+    if a>b then
+      min:=b
+    else
+      min:=a;
   end;
+
+procedure findanswer(x:Integer);
+  begin
+    a[x][0]:=2;
+    inc(answers);
+  end;
+
+procedure points(v,p:Integer);
+  var
+    j,gto,littlechild:Integer;
+  begin
+    a[v][0]:=1;
+    Inc(count);
+    tin[v]:=count;
+    fup[v]:=count;
+    littlechild:=0;
+    for j:=1 to Length(a[v])-1 do
+      begin
+        gto:=a[v][j];
+        if gto=p then
+          Continue;
+        if a[gto][0]>0 then
+          fup[v]:=min(fup[v],tin[gto])
+        else
+          begin
+            points(gto,v);
+            fup[v]:= min(fup[v],fup[gto]);
+            if (fup[gto] >= tin[v]) and (p<>-1) then
+              findanswer(v);
+            Inc(littlechild);
+          end;
+      end;
+    if (p=-1) and (littlechild>1) then
+      findanswer(v);
+  end;
+
 
 begin
   count:=0;
+  answers:=0;
 
-  Assign(f,'components.in');
-  Assign(g,'components.out');
+  Assign(f,'points.in');
+  Assign(g,'points.out');
   Reset(f);
   Rewrite(g);
 
   Readln(f,n,m);
   SetLength(a,n+1);
+
+  SetLength(tin,n+1);
+  SetLength(fup,n+1);
 
   for i:=1 to n do
     begin
@@ -42,18 +80,13 @@ begin
       SetLength(a[l2],Length(a[l2])+1);
       a[l2][Length(a[l2])-1]:=l1;
     end;
-  count:=1;
+
+  points(1,-1);
+
+  Writeln(g,answers);
   for i:=1 to n do
-    begin
-      if a[i][0]=0 then
-        begin
-          components(i);
-          count:=count+1;
-        end;
-    end;
-  Writeln(g,count-1);
-  for i:=1 to n do
-    write(g,a[i][0],' ');
+    if a[i][0]=2 then
+      write(g,i,' ');
 
   Close(f);
   Close(g);
