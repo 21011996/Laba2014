@@ -1,12 +1,16 @@
 {$M 16384,16777216}
 
+type
+  pair=record
+    first:Integer;
+    second:Integer;
+  end;
 var
   f,g:Text;
-  a:array of array of Integer;
-  b:array of array[0..2] of Integer;
-  tin,fup:array of Integer;
+  a:array of array of pair;
+  timeIn,fup,colors,stack:array of Integer;
   i,n,m,l1,l2:Integer;
-  count,answers:Integer;
+  count,maxcolor:Integer;
 
 function min(a,b:Integer):Integer;
   begin
@@ -16,96 +20,94 @@ function min(a,b:Integer):Integer;
       min:=a;
   end;
 
-procedure findanswer(x,y:Integer);
+procedure biconv(u,p:Integer);
   var
-    k,ans,r:Integer;
+    j:Integer;
   begin
-    k:=1;
-    r:=0;
-    while k<=m do
+    a[u][0].first:=1;
+    Inc(count);
+    fup[u]:=count;
+    timeIn[u]:=count;
+    for j:=1 to Length(a[u])-1 do
       begin
-        if ((b[k][1]=x) and (b[k][2]=y)) or ((b[k][2]=x) and (b[k][1]=y)) then
+        if a[u][j].first=p then
+          Continue;
+        if a[a[u][j].first][0].first=0 then
           begin
-            r:=r+1;
-            ans:=k;
+            SetLength(stack,Length(stack)+1);
+            stack[Length(stack)-1]:=a[u][j].second;
+            biconv(a[u][j].first,u);
+            if (fup[a[u][j].first]>=timeIn[u]) then
+              begin
+                inc(maxcolor);
+                while stack[Length(stack)-1]<>a[u][j].second do
+                  begin
+                    colors[stack[Length(stack)-1]]:=maxcolor;
+                    SetLength(stack,Length(stack)-1);
+                  end;
+                colors[stack[Length(stack)-1]]:=maxcolor;
+                SetLength(stack,Length(stack)-1);
+              end;
+            fup[u]:=min(fup[u],fup[a[u][j].first]);
+          end
+        else
+          begin
+            if timeIn[a[u][j].first]<timeIn[u] then
+              begin
+                SetLength(stack,Length(stack)+1);
+                stack[Length(stack)-1]:=a[u][j].second;
+              end;
+            //if fup[u]>timeIn[a[u][j].first] then
+            //  fup[u]:=timeIn[a[u][j].first];
+            fup[u]:=min(fup[u],timeIn[a[u][j].first]);
           end;
-        Inc(k);
-      end;
-    if r=1 then
-      begin
-        b[ans][0]:=1;
-        Inc(answers);
       end;
   end;
 
-procedure bridges(v,p:Integer);
-  var
-    j,gto:Integer;
-  begin
-    a[v][0]:=1;
-    Inc(count);
-    tin[v]:=count;
-    fup[v]:=count;
-    for j:=1 to Length(a[v])-1 do
-      begin
-        gto:=a[v][j];
-        if gto=p then
-          Continue;
-        if a[gto][0]=1 then
-          fup[v]:=min(fup[v],tin[gto])
-        else
-          begin
-            bridges(gto,v);
-            fup[v]:= min(fup[v],fup[gto]);
-            if (fup[gto] > tin[v]) then
-              findanswer(v,gto);
-          end;
-      end;
-  end;
+
 
 
 begin
   count:=0;
-  answers:=0;
+  maxcolor:=0;
 
-  Assign(f,'bridges.in');
-  Assign(g,'bridges.out');
+  Assign(f,'biconv.in');
+  Assign(g,'biconv.out');
   Reset(f);
   Rewrite(g);
 
   Readln(f,n,m);
   SetLength(a,n+1);
 
-  SetLength(tin,n+1);
+  SetLength(timeIn,n+1);
   SetLength(fup,n+1);
-  SetLength(b,m+1);
+  SetLength(colors,m+1);
+  SetLength(stack,1);
 
   for i:=1 to n do
     begin
       SetLength(a[i],1);
-      a[i][0]:=0;
+      a[i][0].first:=0;
     end;
 
   for i:=1 to m do
     begin
       Readln(f,l1,l2);
       SetLength(a[l1],Length(a[l1])+1);
-      a[l1][Length(a[l1])-1]:=l2;
+      a[l1][Length(a[l1])-1].first:=l2;
+      a[l1][Length(a[l1])-1].second:=i;
       SetLength(a[l2],Length(a[l2])+1);
-      a[l2][Length(a[l2])-1]:=l1;
-      b[i][0]:=0;
-      b[i][1]:=l1;
-      b[i][2]:=l2;
+      a[l2][Length(a[l2])-1].first:=l1;
+      a[l2][Length(a[l2])-1].second:=i;
     end;
 
   for i:=1 to n do
-    if a[i][0]=0 then
-      bridges(i,-1);
+    if a[i][0].first=0 then
+      biconv(i,-1);
 
-  Writeln(g,answers);
+  Writeln(g,maxcolor);
   for i:=1 to m do
-    if b[i][0]=1 then
-      write(g,i,' ');
+    write(g,colors[i],' ');
 
   Close(f);
   Close(g);
