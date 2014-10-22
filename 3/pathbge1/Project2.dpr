@@ -1,59 +1,27 @@
 {$M 16384,16777216}
+
 type
   dinmass=array of Integer;
 var
   f,g:Text;
   a:array of array of Integer;
   used:array of Boolean;
-  i,n,m,l1,l2:Integer;
+  list:dinmass;
+  i,n,m,l1,l2,pp,j:Integer;
 
-function min(a,b:Integer):Integer;
+procedure add(x:Integer);
   begin
-    if a>b then
-      min:=b
-    else
-      min:=a;
+    SetLength(list,Length(list)+1);
+    list[Length(list)-1]:=x;
   end;
 
-procedure add(x:Integer;var list:dinmass);
-  begin
-    SetLength(list,list[0]+1);
-    Inc(list[0]);
-    list[list[0]-1]:=x;
-  end;
-
-function pop(var list:dinmass):Integer;
+function pop():Integer;
   var
     answer:Integer;
   begin
-    answer:=list[list[0]-1];
-    SetLength(list,list[0]-1);
-    Dec(list[0]);
+    answer:=list[list[0]];
+    inc(list[0]);
     pop:=answer;
-  end;
-
-procedure pathbge1(x:Integer);
-  var
-    j:Integer;
-    list:dinmass;
-    where:Integer;
-  begin
-    used[x]:=True;
-    SetLength(list,1);
-    list[0]:=1;
-    for j:=1 to Length(a[x])-1 do
-      begin
-        if (a[x][0]+1<a[a[x][j]][0]) and (not used[a[x][j]]) then
-          begin
-            a[a[x][j]][0]:=a[x][0]+1;
-            add(a[x][j],list);
-          end;
-      end;
-    while list[0]>1 do
-      begin
-        where:=pop(list);
-        pathbge1(where);
-      end;
   end;
 
 
@@ -70,7 +38,7 @@ begin
   for i:=1 to n do
     begin
       SetLength(a[i],1);
-      a[i][0]:=1337420;
+      a[i][0]:=400001;
     end;
 
   for i:=1 to m do
@@ -82,7 +50,22 @@ begin
       a[l2][Length(a[l2])-1]:=l1;
     end;
   a[1][0]:=0;
-  pathbge1(1);
+  SetLength(list,1);
+  list[0]:=1;
+  add(1);
+  while (list[0]<=Length(list)-1) do
+    begin
+      pp:=pop();
+      for j:=1 to Length(a[pp])-1 do
+        begin
+          if a[a[pp][j]][0]=400001 then
+            begin
+              a[a[pp][j]][0]:=a[pp][0]+1;
+              add(a[pp][j]);
+            end;
+        end;
+
+    end;
 
   for i:=1 to n do
     write(g,a[i][0],' ');
